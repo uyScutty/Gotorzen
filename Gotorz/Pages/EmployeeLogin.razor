@@ -1,0 +1,117 @@
+﻿@page "/employee-login"
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.AspNetCore.Components.Authorization
+@using System.Security.Claims
+@using Gotorz.Providers
+@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
+@inject AuthenticationStateProvider AuthProvider
+@inject ProtectedSessionStorage SessionStorage
+@inject UserManager<ApplicationUser> UserManager
+@inject NavigationManager Navigation
+@inject AuthenticationStateProvider AuthStateProvider
+
+<h3>Login</h3>
+
+@if (!string.IsNullOrEmpty(ErrorMessage))
+{
+    <div class="text-danger">@ErrorMessage</div>
+}
+
+<EditForm Model="loginModel" OnValidSubmit="HandleLogin">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="mb-3">
+        <label>Email</label>
+        <InputText @bind-Value="loginModel.Email" class="form-control" />
+    </div>
+    <div class="mb-3">
+        <label>Password</label>
+        <InputText @bind-Value="loginModel.Password" type="password" class="form-control" />
+    </div>
+
+    <button class="btn btn-primary" type="submit">Log ind</button>
+</EditForm>
+
+@code {
+    private LoginModel loginModel = new();
+    private string? ErrorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity is { IsAuthenticated: true })
+        {
+            if (user.IsInRole("Admin") || user.IsInRole("Sales"))
+            {
+                Navigation.NavigateTo("/dashboard");
+            }
+            else
+            {
+                Navigation.NavigateTo("/"); // Ugyldig rolle – redirect væk
+            }
+        }
+    }
+
+    private bool loginSuccess = false;
+
+    private async Task HandleLogin()
+    {
+        var user = await UserManager.FindByEmailAsync(loginModel.Email);
+
+        if (user == null)
+        {
+            ErrorMessage = "Forkert email eller password.";
+            return;
+        }
+
+        var passwordValid = await UserManager.CheckPasswordAsync(user, loginModel.Password);
+
+        if (!passwordValid)
+        {
+            ErrorMessage = "Forkert email eller password.";
+            return;
+        }
+
+        var roles = await UserManager.GetRolesAsync(user);
+        var userRole = roles.FirstOrDefault();
+
+        if (userRole is not ("Admin" or "Sales"))
+        {
+            ErrorMessage = "Du har ikke adgang til dette område.";
+            return;
+        }
+
+        // GEM sessionen
+        if (AuthProvider is PersistentAuthenticationStateProvider customAuth)
+        {
+            await customAuth.UpdateAuthenticationState(new UserSession
+                {
+                    Email = user.Email!,
+                    Role = userRole
+                });
+        }
+
+        // Redirect
+        Navigation.NavigateTo("/dashboard?login=success", forceLoad: true);
+    }
+
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (loginSuccess)
+        {
+            loginSuccess = false;
+            Navigation.NavigateTo("/dashboard", forceLoad: true);
+        }
+    }
+
+
+    public class LoginModel
+    {
+        public string Email { get; set; } = string.Empty;
+        public string Password { get; set; } = string.Empty;
+    }
+    }

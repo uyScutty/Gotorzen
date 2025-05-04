@@ -1,0 +1,55 @@
+﻿@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
+@using Gotorz.Providers
+@using System.Security.Claims
+@inject AuthenticationStateProvider AuthProvider
+@inject NavigationManager Navigation
+@inject SignInManager<ApplicationUser> SignInManager
+
+
+<p class="text-muted mb-3">Rolle: @UserRole</p>
+
+<div class="sidebar bg-light border-end p-3" style="width: 250px; height: 100vh;">
+    <h4 class="mb-4">Gotorz Admin</h4>
+    <nav class="nav flex-column">
+        <NavLink class="nav-link" href="/dashboard">Dashboard</NavLink>
+        <NavLink class="nav-link" href="/packages">Packages</NavLink>
+        <NavLink class="nav-link" href="/hotels">Hotels</NavLink>
+        <NavLink class="nav-link disabled text-muted" href="#" tabindex="-1" aria-disabled="true">
+            Bookinger (ikke aktiv)
+        </NavLink>
+
+        @if (IsAdmin)
+        {
+            <NavLink class="nav-link" href="/admin/users">Users</NavLink>
+        }
+
+        <NavLink class="nav-link text-danger" href="/logout">Log ud</NavLink>
+
+
+
+    </nav>
+</div>
+
+@code {
+    private bool IsAdmin = false;
+    private string UserRole = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        UserRole = user.FindFirst(c => c.Type == ClaimTypes.Role)?.Value ?? "";
+        IsAdmin = UserRole == "Admin";
+    }
+
+    private async Task Logout()
+    {
+        await SignInManager.SignOutAsync();
+        Navigation.NavigateTo("/employee-login", forceLoad: true);
+    }
+
+}
+
+

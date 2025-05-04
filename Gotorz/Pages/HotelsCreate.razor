@@ -1,0 +1,63 @@
+﻿
+    @page "/hotels/create"
+@attribute [Authorize]
+
+    @using Microsoft.AspNetCore.Components.Forms
+@using Gotorz.Services
+@inject HotelService HotelService
+@inject NavigationManager Navigation
+@inject TravelpackageService TravelpackageService
+@using Gotorz.Domain
+@using Gotorz.ViewModels
+    @inject HotelService HotelService
+    @inject NavigationManager Navigation
+
+    <h3>Opret nyt hotel</h3>
+
+    <EditForm Model="hotelModel" OnValidSubmit="HandleValidSubmit">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <div class="mb-3">
+            <label>Navn</label>
+            <InputText @bind-Value="hotelModel.Name" class="form-control" />
+        </div>
+
+        <div class="mb-3">
+            <label>Adresse</label>
+            <InputText @bind-Value="hotelModel.Address" class="form-control" />
+        </div>
+
+        <div class="mb-3">
+            <label>By</label>
+            <InputText @bind-Value="hotelModel.City" class="form-control" />
+        </div>
+
+        <div class="mb-3">
+            <label>Land</label>
+            <InputText @bind-Value="hotelModel.Country" class="form-control" />
+        </div>
+
+        <div class="mb-3">
+            <label>ApiHotelId (hvis vi vil hente priser senere)</label>
+            <InputText @bind-Value="hotelModel.ApiHotelId" class="form-control" />
+        </div>
+
+        <button type="submit" class="btn btn-primary">Gem hotel</button>
+        <button type="button" class="btn btn-secondary" @onclick="GoBack">Tilbage</button>
+    </EditForm>
+
+    @code {
+        private Hotel hotelModel = new();
+
+        private async Task HandleValidSubmit()
+        {
+            await HotelService.AddHotelAsync(hotelModel);
+            Navigation.NavigateTo("/hotels");
+        }
+
+        private void GoBack()
+        {
+            Navigation.NavigateTo("/hotels");
+        }
+    }

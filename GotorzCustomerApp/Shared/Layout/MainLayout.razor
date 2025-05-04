@@ -1,0 +1,34 @@
+﻿@inherits LayoutComponentBase
+
+<!-- HEADER -->
+<div style="background-color:#0099dd; height:80px; display:flex; align-items:center; padding:0 20px; color:white;">
+    <!-- Logo -->
+    <div style="display:flex; align-items:center; flex-grow:1;">
+        <span style="font-size:40px; font-weight:bold; color:#FFD700;">G</span>
+        <span style="font-size:32px; font-weight:bold; margin-left:5px;">otorz</span>
+        <span style="font-size:16px; margin-left:5px;">.ae</span>
+    </div>
+
+    <!-- Søgeinfo (dummy) -->
+    <div style="background:white; border-radius:5px; color:#333; padding:10px 20px; margin:0 10px;">Billund (BLL) - Alanya</div>
+    <div style="border-left:1px solid #e0e0e0; height:40px;"></div>
+    <div style="margin:0 10px;">15. maj - 19. maj</div>
+    <div style="border-left:1px solid #e0e0e0; height:40px;"></div>
+    <div style="margin:0 10px;">2 personer, 1 værelse</div>
+
+    <!-- Konto / login -->
+    <div style="margin-left:auto;">
+        <a href="/login" style="color:white; text-decoration:none; border:1px solid white; padding:5px 10px; border-radius:3px;">Log ind</a>
+    </div>
+</div>
+
+<!-- SIDENS INDHOLD -->
+<div class="main-content">
+    @Body
+</div>
+
+<!-- FOOTER -->
+<div style="background:#0099dd; color:white; height:30px; display:flex; align-items:center; justify-content:space-between; padding:0 50px;">
+    <span>FAQ</span>
+    <span>© 2025 Gotorz.ae - Alle rettigheder forbeholdes</span>
+</div>

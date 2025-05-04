@@ -1,0 +1,15 @@
+﻿@namespace Gotorz.Shared
+@inherits LayoutComponentBase
+
+<div class="d-flex" style="min-height: 100vh;">
+    <NavMenu /> @* Sidebar *@
+
+    <div class="flex-grow-1 d-flex flex-column">
+        <Topbar /> @* Topbar *@
+
+        <div class="container-fluid p-4">
+            @Body @* Hovedindhold *@
+        </div>
+    </div>
+</div>
+

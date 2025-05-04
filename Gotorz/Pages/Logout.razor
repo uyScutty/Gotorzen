@@ -1,0 +1,25 @@
+﻿@page "/logout"
+@using Gotorz.Providers
+
+@inject NavigationManager Navigation
+@inject IHttpClientFactory ClientFactory
+@inject AuthenticationStateProvider AuthProvider
+
+<h3>Logger ud...</h3>
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        var client = ClientFactory.CreateClient("GotorzApi");
+        await client.PostAsync("/auth/logout", null);
+
+        // 👉 Force refresh UI's auth state (hvis du bruger custom AuthenticationStateProvider)
+        if (AuthProvider is PersistentAuthenticationStateProvider custom)
+        {
+            await custom.UpdateAuthenticationState(null);
+        }
+
+        // 👉 Tving navigation væk
+        Navigation.NavigateTo("/employee-login", forceLoad: true);
+    }
+}

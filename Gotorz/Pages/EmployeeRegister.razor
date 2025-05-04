@@ -1,0 +1,88 @@
+﻿@page "/register"
+@using System.ComponentModel.DataAnnotations
+@attribute [Authorize(Roles = "Admin")]
+@inject UserManager<ApplicationUser> UserManager
+@inject NavigationManager Navigation
+
+<h3>Opret medarbejder</h3>
+
+@if (!string.IsNullOrEmpty(StatusMessage))
+{
+    <div class="alert alert-info">@StatusMessage</div>
+}
+
+<EditForm Model="registerModel" OnValidSubmit="HandleRegister">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="mb-3">
+        <label>Email</label>
+        <InputText @bind-Value="registerModel.Email" class="form-control" />
+    </div>
+    <div class="mb-3">
+        <label>Password</label>
+        <InputText @bind-Value="registerModel.Password" type="password" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label>Rolle</label>
+        <InputSelect @bind-Value="registerModel.Role" class="form-control">
+            <option value="">-- Vælg rolle --</option>
+            <option value="Admin">Admin</option>
+            <option value="Sales">Sales</option>
+        </InputSelect>
+    </div>
+
+    <button class="btn btn-success" type="submit">Opret</button>
+</EditForm>
+
+@code {
+    private RegisterModel registerModel = new();
+    private string? StatusMessage;
+
+    public class RegisterModel
+    {
+        [Required(ErrorMessage = "Email skal udfyldes")]
+        public string Email { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Password skal udfyldes")]
+        public string Password { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Rolle skal vælges")]
+        public string Role { get; set; } = string.Empty;
+    }
+
+    private async Task HandleRegister()
+    {
+        // Tjek om email allerede findes
+        var existingUser = await UserManager.FindByEmailAsync(registerModel.Email);
+        if (existingUser != null)
+        {
+            StatusMessage = "En bruger med denne email findes allerede.";
+            return;
+        }
+
+        var user = new ApplicationUser { UserName = registerModel.Email, Email = registerModel.Email };
+        var result = await UserManager.CreateAsync(user, registerModel.Password);
+
+        if (result.Succeeded)
+        {
+            // Tjek om rollen er gyldig
+            if (registerModel.Role != "Admin" && registerModel.Role != "Sales")
+            {
+                StatusMessage = "Ugyldig rolle valgt.";
+                return;
+            }
+
+            await UserManager.AddToRoleAsync(user, registerModel.Role);
+
+            // Navigér til brugerliste efter succes
+            Navigation.NavigateTo("/admin/users");
+        }
+        else
+        {
+            StatusMessage = string.Join(", ", result.Errors.Select(e => e.Description));
+        }
+    }
+}
+

@@ -1,0 +1,81 @@
+﻿@page "/homepage"
+@using GotorzCustomerApp
+
+<Header />
+
+<div class="gotorz-home" style="max-width:800px; margin:auto; font-family:Arial, sans-serif;">
+    <!-- Hero Banner -->
+    <div style="background:#a0cef7; height:300px; text-align:center; padding-top:50px;">
+        <h2 style="color:white; font-size:28px;">Find din drømmerejse</h2>
+
+        <div style="background:white; width:700px; margin:20px auto; padding:20px; border:1px solid #909090; border-radius:5px;">
+            <div style="display:flex; gap:10px; margin-bottom:10px;">
+                <div style="background:#f7f7f7; flex:1; padding:10px; border:1px solid #e0e0e0;">
+                    <small style="color:#707070">Afgang</small><br />
+                    <strong>Billund (BLL)</strong>
+                </div>
+                <div style="background:#f7f7f7; flex:1; padding:10px; border:1px solid #e0e0e0;">
+                    <small style="color:#707070">Rejsemål</small><br />
+                    <strong>Hvor vil du gerne hen?</strong>
+                </div>
+                <div style="background:#f7f7f7; width:160px; padding:10px; border:1px solid #e0e0e0;">
+                    <small style="color:#707070">Hvornår?</small><br />
+                    <strong>17. mar. - 20. mar.</strong>
+                </div>
+            </div>
+            <div style="display:flex; justify-content:space-between;">
+                <div style="background:#f7f7f7; flex:1; padding:10px; border:1px solid #e0e0e0;">
+                    <small style="color:#707070">Rejsende og flyklasse</small><br />
+                    <strong>2 passagerer • 1 værelse • All inclusive</strong>
+                </div>
+                <button style="background:#ff0066; border:none; color:white; font-size:16px; width:160px; height:60px;">SØG</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Yellow divider -->
+    <div style="height:20px; background:#FFD700;"></div>
+
+    <!-- Popular destinations -->
+    <div style="background:#e6f3fa; height:60px; text-align:center; padding-top:20px;">
+        <h3 style="margin:0; font-size:22px;">Populære destinationer</h3>
+    </div>
+
+    <div style="display:flex; justify-content:space-around; margin:20px 50px;">
+        @foreach (var destination in new[] { ("Spanien", "2.499 kr."), ("Grækenland", "3.299 kr."), ("Italien", "2.899 kr.") })
+        {
+            <div style="width:220px; border:1px solid #d0d0d0; border-radius:5px; overflow:hidden;">
+                <div style="height:120px; background:#d0d0d0; text-align:center; line-height:120px; color:#707070;">Billede</div>
+                <div style="padding:10px; text-align:center;">
+                    <strong style="font-size:16px;">@destination.Item1</strong><br />
+                    <span style="font-size:14px;">Fra @destination.Item2</span>
+                    <div style="margin-top:10px;">
+                        <button style="background:#0099dd; border:none; color:white; border-radius:15px; padding:5px 20px;">SE TILBUD</button>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <!-- Yellow divider -->
+    <div style="height:10px; background:#FFD700;"></div>
+
+    <!-- Offers section -->
+    <div style="background:#e6f3fa; height:60px; text-align:center; padding-top:20px;">
+        <h3 style="margin:0; font-size:22px;">Aktuelle tilbud lige nu</h3>
+    </div>
+
+    <div style="margin:20px 50px; border:1px solid #d0d0d0; display:flex; border-radius:5px; overflow:hidden;">
+        <div style="width:200px; background:#d0d0d0; text-align:center; line-height:150px; color:#707070;">Billede</div>
+        <div style="flex:1; padding:20px; text-align:center;">
+            <h4 style="margin:10px 0;">All Inclusive i Alanya</h4>
+            <p>7 dage, 4-stjernet hotel med pool og direkte adgang til stranden</p>
+            <strong>Fra 3.999 kr. per person</strong>
+        </div>
+        <div style="width:150px; display:flex; align-items:center; justify-content:center;">
+            <button style="background:#0099dd; border:none; color:white; border-radius:15px; padding:10px 20px;">BOOK NU</button>
+        </div>
+    </div>
+</div>
+
+<Footer />

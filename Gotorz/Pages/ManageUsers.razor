@@ -1,0 +1,123 @@
+﻿@page "/admin/users"
+@using Microsoft.AspNetCore.Identity
+@using Gotorz.Data
+@attribute [Authorize(Roles = "Admin")]
+@inject UserManager<ApplicationUser> UserManager
+
+<h3>Administrer brugere</h3>
+
+@if (!string.IsNullOrEmpty(StatusMessage))
+{
+    <div class="alert alert-success">@StatusMessage</div>
+}
+
+@if (users == null)
+{
+    <p><em>Indlæser brugere...</em></p>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Email</th>
+                <th>Rolle</th>
+                <th>Handlinger</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var user in users)
+            {
+                <tr>
+                    <td>@user.Email</td>
+                    <td>@(userRoles.ContainsKey(user.Id) ? string.Join(", ", userRoles[user.Id]) : "Ingen")</td>
+                    <td>
+                        <button class="btn btn-danger btn-sm" @onclick="() => ConfirmDelete(user.Id, user.Email)">
+                            Slet
+                        </button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+<a class="btn btn-success" href="/register">+ Opret ny medarbejder</a>
+
+@if (showConfirmDialog)
+{
+    <div class="alert alert-warning mt-3 p-3">
+        <p>Er du sikker på, at du vil slette brugeren <strong>@selectedUserEmail</strong>?</p>
+        <button class="btn btn-danger me-2" @onclick="DeleteUser">Ja, slet</button>
+        <button class="btn btn-secondary" @onclick="() => showConfirmDialog = false">Annuller</button>
+    </div>
+}
+
+@code {
+    private List<ApplicationUser>? users;
+    private Dictionary<string, List<string>> userRoles = new();
+    private string? selectedUserId;
+    private string? selectedUserEmail;
+    private bool showConfirmDialog = false;
+    private string? StatusMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadUsersAsync();
+    
+
+        users = UserManager.Users.ToList();
+
+        foreach (var user in users)
+        {
+            var roles = await UserManager.GetRolesAsync(user);
+            userRoles[user.Id] = roles.ToList();
+        }
+    }
+
+    private void ConfirmDelete(string userId, string email)
+    {
+        selectedUserId = userId;
+        selectedUserEmail = email;
+        showConfirmDialog = true;
+    }
+    private async Task DeleteUser()
+    {
+        if (selectedUserId == null)
+            return;
+
+        var user = await UserManager.FindByIdAsync(selectedUserId);
+        if (user != null)
+        {
+            var result = await UserManager.DeleteAsync(user);
+            if (result.Succeeded)
+            {
+                StatusMessage = $"Brugeren {user.Email} blev slettet.";
+                await LoadUsersAsync(); // 🧠 Genindlæs brugerliste her!
+            }
+            else
+            {
+                StatusMessage = "Fejl ved sletning af bruger.";
+            }
+        }
+
+        showConfirmDialog = false;
+        selectedUserId = null;
+        selectedUserEmail = null;
+    }
+
+    private async Task LoadUsersAsync()
+    {
+        users = UserManager.Users.ToList();
+        userRoles.Clear();
+
+        foreach (var user in users)
+        {
+            var roles = await UserManager.GetRolesAsync(user);
+            userRoles[user.Id] = roles.ToList();
+        }
+    }
+
+}
+
+

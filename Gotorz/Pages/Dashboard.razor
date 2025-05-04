@@ -1,0 +1,154 @@
+﻿@page "/dashboard"
+@using Microsoft.AspNetCore.Identity
+@using Gotorz.Services
+@using Gotorz.Data
+@using Microsoft.AspNetCore.Components.Authorization
+@inject UserManager<ApplicationUser> UserManager
+@inject AuthenticationStateProvider AuthProvider
+@inject DashboardService DashboardService
+@inject NavigationManager Navigation
+
+@if (ShowLoginSuccessMessage)
+{
+    <div class="alert alert-success" role="alert">
+        Du er logget ind!
+    </div>
+}
+
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h4 class="card-title">Velkommen, @UserName</h4>
+                    <p class="card-text">Du er logget ind som: <strong>@UserRole</strong></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <h4>🔧 Administration</h4>
+
+    <div class="row">
+        <div class="col-md-4 mb-3">
+            <button class="btn btn-outline-primary w-100" @onclick='() => Navigation.NavigateTo("/packages")'>
+                Administrer pakker
+            </button>
+        </div>
+
+        @if (IsAdmin)
+        {
+            <div class="col-md-4 mb-3">
+                <button class="btn btn-outline-secondary w-100" @onclick='() => Navigation.NavigateTo("/admin/users")'>
+                    Administrer brugere
+                </button>
+            </div>
+        }
+
+        <div class="col-md-4 mb-3">
+            <button class="btn btn-outline-info w-100" @onclick='() => Navigation.NavigateTo("/bookings")' disabled>
+                Administrer bookinger (ikke klar)
+            </button>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-md-4">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title">Administrer Hoteller</h5>
+                    <p class="card-text">Tilføj, rediger og fjern hoteller.</p>
+                    <button class="btn btn-primary" @onclick="@(() => Navigation.NavigateTo("/hotels"))">Gå til hoteller</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title">Opret Pakkerejse</h5>
+                    <p class="card-text">Sammensæt en ny rejsepakke.</p>
+                    <button class="btn btn-success" @onclick="@(() => Navigation.NavigateTo("/packages/create"))">Opret pakke</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title">Se/Revider Pakkerejser</h5>
+                    <p class="card-text">Se eksisterende rejsepakker.</p>
+                    <button class="btn btn-info" @onclick="@(() => Navigation.NavigateTo("/packages"))">Se pakkerejser</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+    <div class="row">
+        <div class="col-md-6 mb-4">
+            <div class="card text-white bg-primary shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">📦 Aktive pakkerejser</h5>
+                    <p class="card-text">Der er <strong>@TotalPackages</strong> aktive pakkerejser i systemet.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 mb-4">
+            <div class="card text-white bg-success shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">🌍 Top 3 destinationer</h5>
+                    <ul class="card-text">
+                        @foreach (var dest in TopDestinations)
+                        {
+                            <li>@dest.Destination (@dest.Count salg)</li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+@code {
+    [Parameter]
+    [SupplyParameterFromQuery]
+    public string? Login { get; set; }
+
+    private bool IsAdmin = false;
+    private string UserName = "";
+    private string UserRole = "";
+    private int TotalPackages;
+    private List<(string Destination, int Count)> TopDestinations = new();
+    private bool ShowLoginSuccessMessage = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (!user.Identity?.IsAuthenticated ?? true)
+        {
+            Navigation.NavigateTo("/employee-login", forceLoad: true);
+            return;
+        }
+
+        UserName = user.Identity?.Name ?? "Ukendt";
+        UserRole = user.FindFirst(c => c.Type == System.Security.Claims.ClaimTypes.Role)?.Value ?? "Ukendt";
+        IsAdmin = UserRole == "Admin";
+
+        if (Login == "success")
+        {
+            ShowLoginSuccessMessage = true;
+        }
+
+        TotalPackages = await DashboardService.GetTotalTravelPackagesAsync();
+        TopDestinations = await DashboardService.GetTopDestinationsAsync();
+    }
+}
+
+
+
+

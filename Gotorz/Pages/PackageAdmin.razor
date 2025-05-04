@@ -1,0 +1,12 @@
+﻿@page "/admin/packages"
+@attribute [Authorize]
+@using Gotorz.Services
+@using Gotorz.ViewModels
+@inject NavigationManager Navigation
+@inject TravelpackageService TravelpackageService
+
+<h3>📦 Administrer rejsepakker</h3>
+
+<a class="btn btn-success mb-3" href="/packages/create">+ Opret ny pakke</a>
+
+<PackagesOverview /> <!-- Genbrug oversigt-komponent her -->

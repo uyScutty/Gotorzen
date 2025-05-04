@@ -1,0 +1,79 @@
+﻿@page "/hotels/edit/{Id:int}"
+@attribute [Authorize]
+
+@using Microsoft.AspNetCore.Components.Forms
+@using Gotorz.Services
+@inject HotelService HotelService
+@inject NavigationManager Navigation
+@inject TravelpackageService TravelpackageService
+@using Gotorz.Domain
+@using Gotorz.ViewModels
+
+<h3>Rediger hotel</h3>
+
+@if (hotel == null)
+{
+    <p>Indlæser...</p>
+}
+else
+{
+    <EditForm Model="hotel" OnValidSubmit="SaveHotel">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <div class="mb-3">
+            <label>Navn</label>
+            <InputText @bind-Value="hotel.Name" class="form-control" />
+        </div>
+
+        <div class="mb-3">
+            <label>Adresse</label>
+            <InputText @bind-Value="hotel.Address" class="form-control" />
+        </div>
+
+        <div class="mb-3">
+            <label>Land</label>
+            <InputText @bind-Value="hotel.Country" class="form-control" />
+        </div>
+
+        <div class="mb-3">
+            <label>By</label>
+            <InputText @bind-Value="hotel.City" class="form-control" />
+        </div>
+
+        <div class="mb-3">
+            <label>API Hotel ID</label>
+            <InputText @bind-Value="hotel.ApiHotelId" class="form-control" />
+        </div>
+
+        <button class="btn btn-primary" type="submit">Gem ændringer</button>
+        <button class="btn btn-secondary ms-2" type="button" @onclick="Cancel">Annullér</button>
+    </EditForm>
+}
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private Hotel? hotel;
+
+    protected override async Task OnInitializedAsync()
+    {
+        hotel = await HotelService.GetHotelByIdAsync(Id);
+    }
+
+    private async Task SaveHotel()
+    {
+        if (hotel != null)
+        {
+            await HotelService.UpdateHotelAsync(hotel);
+            Navigation.NavigateTo("/hotels");
+        }
+    }
+
+    private void Cancel()
+    {
+        Navigation.NavigateTo("/hotels");
+    }
+}
+

@@ -1,0 +1,45 @@
+﻿@page "/employee-welcome"
+@using Microsoft.AspNetCore.Components.Authorization
+@using System.Security.Claims
+@inject AuthenticationStateProvider AuthProvider
+@inject NavigationManager Navigation
+
+<h3>Velkommen</h3>
+
+@if (!string.IsNullOrEmpty(UserName))
+{
+    <p>Hej, @UserName! Du er logget ind som <strong>@UserRole</strong>.</p>
+    <button class="btn btn-primary" @onclick="GoToDashboard">Gå til dashboard</button>
+}
+else
+{
+    <p>Indlæser brugerinfo...</p>
+}
+
+@code {
+    private string UserName = "";
+    private string UserRole = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity is { IsAuthenticated: true })
+        {
+            UserName = user.Identity.Name ?? "Ukendt";
+
+            var roleClaim = user.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role);
+            if (roleClaim != null)
+            {
+                UserRole = roleClaim.Value;
+            }
+        }
+    }
+
+    private void GoToDashboard()
+    {
+        Navigation.NavigateTo("/dashboard?login=success");
+
+    }
+}
